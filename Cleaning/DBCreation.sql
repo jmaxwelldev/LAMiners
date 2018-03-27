@@ -115,3 +115,95 @@ SELECT * FROM CrimeData
     LIMIT 10;
 
 TRUNCATE CrimeData;
+
+DROP TABLE HourlyWeather;
+
+CREATE TABLE HourlyWeather (
+	dfNum Int,
+	WeatherDate DATETIME NOT NULL,
+    ReportType VARCHAR(5) NOT NULL,
+    HourlyVisibility Decimal(5, 2),
+	HourlyDryBulbTempF Int,
+    HourlyRelativeHumidity Int,
+	HourlyPrecip Decimal(5,2),
+	HourlyHeatIndex Decimal(5,2),
+    PRIMARY KEY(WeatherDate)
+);
+
+LOAD DATA LOCAL INFILE '~/Data/LAMiners/Data/HourlyWeather.csv'
+	INTO TABLE HourlyWeather
+    FIELDS TERMINATED BY ','
+    OPTIONALLY ENCLOSED BY '"'
+    LINES TERMINATED BY '\n'
+	IGNORE 1 ROWS
+(
+	dfNum,
+	@vdate,
+    ReportType,
+    @varvisibility,
+    @vartemp,
+    @varhumid,
+    @varprecip,
+    @varheatindex
+)
+SET WeatherDate = STR_TO_DATE(@vdate, '%Y-%m-%d %H:%i'),
+		HourlyVisibility = IF(@varvisibility = '', -1, @varvisibility),
+        HourlyDryBulbTempF = IF(@vartemp = '', 999, @vartemp),
+        HourlyRelativeHumidity = IF(@varhumid='', -1, @varhumid),
+        HourlyPrecip = IF(@varprecip='', 0, @varprecip),
+        HourlyHeatIndex = IF(@varheatindex='', 999, @varheatindex);
+
+SELECT * FROM HourlyWeather LIMIT 30;
+
+CREATE TABLE DailyWeather (
+	dfNum Int NOT NULL, 
+	WeatherDate DATE NOT NULL,
+    DailyMaximumDryBulbTemp Int,
+    DailyMinimumDryBulbTemp Int,
+    DailyAverageDryBulbTemp Int,
+    DailyAverageRelativeHumidity Int,
+    DailySunrise TIME,
+    DailySunset TIME,
+    DailyPrecip decimal(5,2),
+    DailySnowfall decimal(4,1),
+    DailySnowDepth decimal(4,1),
+    DailyAverageWindSpeed decimal(3,1),
+    DailyAverageHeatIndex decimal(5,2),
+    PRIMARY KEY (WeatherDate)
+);
+
+LOAD DATA LOCAL INFILE '~/Data/LAMiners/Data/DailyWeather.csv'
+	INTO TABLE DailyWeather
+    FIELDS TERMINATED BY ','
+    OPTIONALLY ENCLOSED BY '"'
+    LINES TERMINATED BY '\n'
+	IGNORE 1 ROWS
+(
+	dfNum,
+	@vdate,
+    @vTempMax,
+    @vTempMin,
+    @vTempAvg,
+    @vAvgHum,
+    @vSunrise,
+    @vSunset,
+    @vPrecip,
+    @vSnowfall,
+    @vSnowDepth,
+    @vWindSpeed,
+    @vHI
+)
+SET WeatherDate = STR_TO_DATE(@vdate, '%Y-%m-%d'),
+		DailyMaximumDryBulbTemp = IF(@vTempMax='', 999, @vTempMax),
+        DailyMinimumDryBulbTemp = IF(@vTempMin='', 999, @vTempMin),
+        DailyAverageDryBulbTemp = IF(@vTempAvg='', 999, @vTempAvg),
+        DailyAverageRelativeHumidity = IF(@vAvgHum='', -1, @vAvgHum),
+        DailySunrise = CONCAT(@vSunrise, '00'),
+        DailySunset = CONCAT(@vSunset, '00'),
+        DailyPrecip = IF(@vPrecip='', 0, @vPrecip),
+        DailySnowfall = IF(@vSnowfall='', 0, @vSnowfall),
+        DailySnowDepth = IF(@vSnowDepth='', 0, @vSnowDepth),
+        DailyAverageWindSpeed = IF(@vWindSpeed='', 0, @vWindSpeed),
+        DailyAverageHeatIndex = IF(@vHI='', 999, @vHI);
+
+SELECT * FROM DailyWeather LIMIT 10;
