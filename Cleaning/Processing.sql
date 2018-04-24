@@ -20,7 +20,7 @@ CREATE OR REPLACE VIEW Weather AS
 		ON DATE(h.WeatherDate) = DATE(d.WeatherDate));
 
 -- Exporting the weather table
-SELECT * FROM Weather;
+SELECT * FROM Weather ORDER BY WeatherDate ASC;
 
 -- Match codes and IDs to descriptions
 SELECT DISTINCT( CrimeCode), CrimeCodeDescription FROM CrimeData;
@@ -42,9 +42,9 @@ SELECT ID, DateReported, DateOccurred, TimeOccurred, AreaID, ReportingDistrict, 
  Address, CrossStreet, Location, u.Rate AS UnemploymentRate FROM 
 	CrimeData AS c
     JOIN UnemploymentRate AS u
-    ON MONTH(u.RateDate) = MONTH(c.DateOccurred) AND YEAR(u.RateDate) = YEAR(c.DateOccurred);
+    ON MONTH(u.RateDate) = MONTH(c.DateOccurred) AND YEAR(u.RateDate) = YEAR(c.DateOccurred)
+    ORDER BY DateOccurred, TimeOccurred ASC;
     
-
 -- Join the weather data to the crime data
 
 /*
